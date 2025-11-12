@@ -7,13 +7,13 @@
 struct Node
 {
     int *keys;
-    Node **c;
+    Node **c; //array of pointer to internal nodes 
     int t;
     bool leaf;
     int n;
 
     Node(int t, bool leaf = true);
-
+    
     ~Node();
 };
 

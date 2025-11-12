@@ -7,22 +7,83 @@ NOTE: Please follow logic from CLRSv4 directly. Additionally, in cases 3a and 3b
 // delete the key k from the btree
 void BTree::remove(int k)
 {
+    if (root == nullptr)
+    {
+        return;    
+    }
+    
+    remove(root, k, true);
 }
 
 // delete the key k from the btree rooted at x
 void BTree::remove(Node *x, int k, bool x_root)
 {
+    int nearest = find_k(k);
+    if (x->keys[nearest] == k)
+    {
+        //case 1
+        if(x->leaf)
+        {
+           remove_leaf_key(x, nearest);
+        }
+        else
+        {   
+            //if child at nearest or nearest+1 has >= t keys
+            //case 2
+            if (x->c[nearest]->n >= t)
+            {
+                remove_internal_key(x, nearest, nearest);
+            }
+            else if (x->c[nearest+1]-> >= t)
+            {
+                remove_internal_key(x, nearest, nearest+1);
+            }
+            else  
+            {
+                merge_left(x->c[nearest], x->c[nearest+1],k);
+                x->n--;
+                if (x_root && x->n == 0)
+                {
+                    
+                }
+                
+            }
+            
+            //j = successor/predecessor index 
+            // nearest/nearest+1
+            
+            /* code */
+            
+            //case 3
+            //else
+            
+        }
+        
+        
+    }
+    else
+    {
+        if(x->c[nearest]->n)
+        {
+
+        }
+        remove(x->c[nearest], int k, false);
+    }
+    
 }
 
 // return the index i of the first key in the btree node x where k <= x.keys[i]
 // if i = x.n then no such key exists
 int BTree::find_k(Node *x, int k)
 {
+    
 }
 
 // remove the key at index i from a btree leaf node x
 void BTree::remove_leaf_key(Node *x, int i)
 {
+    x->n--;
+    x->keys[nearest] = 
 }
 
 // remove the key at index i and child at index j from a btree internal node x
