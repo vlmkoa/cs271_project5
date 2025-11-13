@@ -87,11 +87,11 @@ void BTree::remove(Node *x, int k, bool x_root)
             {
                 if(nearest>=1)
                 {
-                    merge_left();
+                    merge_left(x->c[nearest-1], x->c[nearest],k);
                 }
                 else 
                 {
-
+                    merge_right(x->c[nearest+1], x->c[nearest],k);
                 }
             }
             
