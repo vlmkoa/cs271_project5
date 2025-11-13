@@ -172,11 +172,43 @@ int BTree::min_key(Node *x)
 // merge key k and all keys and children from y into y's LEFT sibling x
 void BTree::merge_left(Node *x, Node *y, int k)
 {
+    x->keys[x->n] = k;
+    x->n++;
+    int i = 0;
+    while (i < y->n)
+    {
+        x->keys[x->n] = y->keys[i];
+        x->c[x->n] = y->c[i];
+        i++;
+        x->n++;
+    }
+    x->c[x->n] = y->c[i]; // copy last child
+    delete y;
 }
 
 // merge key k and all keys and children from y into y's RIGHT sibling x
 void BTree::merge_right(Node *x, Node *y, int k)
 {
+    int curLen = x->n;         // current length of x
+    x->n = x->n + y->n + 1;    // the new length of x
+    x->c[x->n] = x->c[curLen]; // move x's last child node to new last position
+    int i = curLen - 1;
+    int j = x->n - 1;
+    while (i >= 0)
+    {
+        x->keys[j] = x->keys[i];
+        x->c[j] = x->c[i];
+        i--;
+        j--;
+    }
+    x->keys[j] = k;
+    x->c[j] = y->c[y->n];
+    for (int k = 0; k < y->n; k++)
+    {
+        x->keys[k] = y->keys[k];
+        x->c[k] = y->c[k];
+    }
+    delete y;
 }
 
 // Give y an extra key by moving a key from its parent x down into y
