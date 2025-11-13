@@ -31,12 +31,13 @@ void BTree::remove(Node *x, int k, bool x_root)
 {
     if (x == nullptr)
     {
-        cout << "key is not in node" << endl;
+        cout << "node is null" << endl;
         return;
     }
     int nearest = find_k(x, k);
 
-    if(x->leaf && nearest == x->n){ //special case. not in leaf and not in tree
+    if(x->leaf &&  (nearest == x->n || x->keys[nearest] != k)){ //special case. not in leaf and not in tree
+        cout<< "key is not in node" << endl;
         return; 
     }
     if (nearest < x->n && x->keys[nearest] == k)
@@ -111,7 +112,7 @@ void BTree::remove(Node *x, int k, bool x_root)
                 }
                 else // nearest is the last one
                 {
-                    merge_left(x->c[nearest - 1], x->c[nearest], x->keys[nearest]);
+                    merge_left(x->c[nearest - 1], x->c[nearest], x->keys[nearest-1]);
                     nearest--;
                 }
                 x->n--;
@@ -146,7 +147,7 @@ int BTree::find_k(Node *x, int k)
         return x->n - 1;
     }
     int i = 0; // i is location
-    while (i < (x->n - 1) && x->keys[i] < k)
+    while (i < (x->n) && x->keys[i] < k)
     {
         i++;
     }
@@ -165,6 +166,12 @@ void BTree::remove_leaf_key(Node *x, int i)
     for (int j = i; j < x->n; j++)
     {
         x->keys[j] = x->keys[j + 1];
+    }
+    // if root is empty after removing
+    if (root == x && x->n == 0)
+    {
+        delete x;
+        root = nullptr;
     }
     return;
 }
