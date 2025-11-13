@@ -213,7 +213,6 @@ void BTree::swap_left(Node *x, Node *y, Node *z, int i)
 {
     // z = x->c[i] (left sibling), y = x->c[i+1]
 
-    
     // Shift y's keys one position to the right
     for (int j = y->n - 1; j >= 0; --j)
     {
