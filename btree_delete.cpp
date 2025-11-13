@@ -3,30 +3,46 @@
 /*
 NOTE: Please follow logic from CLRSv4 directly. Additionally, in cases 3a and 3b please check for an immediate right sibling first.
 */
+/**
+ * Created by Stacey Truex, Ryan Vo, Benjamin Nelson, and Nathan Hydukovich
+ * This file contains the remove function and its helper functions for the BTree class.
+ */
 
-// delete the key k from the btree
+/**
+ * remove(k): remove the key k from the tree
+ *
+ * Pre-condition: None
+ * Post-condition: If k is in the tree, it is removed.
+ */
+using namespace std;
 void BTree::remove(int k)
 {
-    if (root == nullptr)
-    {
-        return;
-    }
-
     remove(root, k, true);
 }
 
-// delete the key k from the btree rooted at x
+/**
+ * remove(x, k, x_root): delete the key k from the btree rooted at x
+ *
+ * Pre-condition: if x_root is true, then x must have at least one key
+ *                if x_root is false, then x must have at least t keys
+ * Post-condition: If k is in the subtree rooted at x, it is removed.
+ */
 void BTree::remove(Node *x, int k, bool x_root)
 {
+    if (x == nullptr)
+    {
+        cout << "key is not in node" << endl;
+        return;
+    }
     int nearest = find_k(x, k);
     if (nearest < x->n && x->keys[nearest] == k)
     {
-        // case 1
+        // case 1: key is in leaf node
         if (x->leaf)
         {
             remove_leaf_key(x, nearest);
         }
-        else // case 2
+        else // case 2: key is in internal node
         {
             // if child at nearest or nearest+1 has >= t keys
             // case 2a
@@ -65,16 +81,17 @@ void BTree::remove(Node *x, int k, bool x_root)
     {
         if (x->c[nearest]->n == t - 1)
         {
-            // case 3a: if either sibling has at least t keys
-            if (nearest >= 1 && x->c[nearest - 1]->n >= t) // case 3a_i
-            {
-                swap_left(x, x->c[nearest], x->c[nearest - 1], nearest - 1);
-            }
-            else if (nearest <= x->n && x->c[nearest + 1]->n >= t) // case 3a_ii
+            // case 3a: if either sibling of the nearest child has at least t keys
+            if (nearest < x->n && x->c[nearest + 1]->n >= t)
             {
                 swap_right(x, x->c[nearest], x->c[nearest + 1], nearest);
             }
-            else // case 3b: if sibling has t-1 keys
+            else if (nearest >= 1 && x->c[nearest - 1]->n >= t)
+            {
+                swap_left(x, x->c[nearest], x->c[nearest - 1], nearest - 1);
+            }
+
+            else // case 3b: if siblings of the nearest child has t-1 keys
             {
                 if (nearest < x->n) // nearest isn't the last one
                 {
@@ -90,12 +107,13 @@ void BTree::remove(Node *x, int k, bool x_root)
                 }
                 else // nearest is the last one
                 {
-                    merge_left(x->c[nearest - 1], x->c[nearest],  x->keys[nearest]);
+                    merge_left(x->c[nearest - 1], x->c[nearest], x->keys[nearest]);
                     nearest--;
                 }
                 x->n--;
             }
         }
+        // if root is empty after merge
         if (x_root && x->n == 0) // Root case
         {
             root = x->c[0];
@@ -109,8 +127,13 @@ void BTree::remove(Node *x, int k, bool x_root)
     }
 }
 
-// return the index i of the first key in the btree node x where k <= x.keys[i]
-// if i = x.n then no such key exists
+/**
+ * find_k(x, k): return the index i of the first key in the btree node x where k <= x.keys[i]
+ * if i = x.n then no such key exists
+ *
+ * Pre-condition: x is not nullptr
+ * Post-condition: returns the index i of the first key in the btree node x where k <= x.keys[i]
+ */
 int BTree::find_k(Node *x, int k)
 {
     // fast check for removing max key
@@ -126,13 +149,14 @@ int BTree::find_k(Node *x, int k)
     return i;
 }
 
-// remove the key at index i from a btree leaf node x
+/**
+ * remove_leaf_key(x, i): remove the key at index i from a btree leaf node x
+ *
+ * Pre-condition: x is a leaf node and 0 <= i < x.n
+ * Post-condition: the key at index i is removed from the btree leaf node x
+ */
 void BTree::remove_leaf_key(Node *x, int i)
 {
-    if (i == x->n)
-    {
-        return;
-    }
     for (int j = i; j < x->n; j++)
     {
         x->keys[j] = x->keys[j + 1];
@@ -141,7 +165,15 @@ void BTree::remove_leaf_key(Node *x, int i)
     return;
 }
 
-// remove the key at index i and child at index j from a btree internal node x
+/**
+ * remove_internal_key(x, i, j): remove the key at index i from a btree internal node x by
+ * replacing it with either its predecessor or successor at child index j and continue to
+ * delete predecessor/successor from child j.
+ *
+ * Pre-condition: x is an internal node, 0 <= i < x.n, and j = i or j = i+1
+ * Post-condition: the key at index i becomes its predecessor/successor from child j and
+ * the predecessor/successor is removed from child j.
+ */
 void BTree::remove_internal_key(Node *x, int i, int j)
 {
     int replacment = 0;
@@ -157,58 +189,88 @@ void BTree::remove_internal_key(Node *x, int i, int j)
     remove(x->c[j], replacment);
 }
 
-// return the max key in the btree rooted at node x
+/**
+ * max_key(x): return the max key in the btree rooted at node x
+ *
+ * Pre-condition: x is not nullptr
+ * Post-condition: returns the max key in the btree rooted at node x
+ */
 int BTree::max_key(Node *x)
 {
     return x->keys[x->n - 1];
 }
 
-// return the min key in the btree rooted at node x
+/**
+ * min_key(x): return the min key in the btree rooted at node x
+ *
+ * Pre-condition: x is not nullptr
+ * Post-condition: returns the min key in the btree rooted at node x
+ */
 int BTree::min_key(Node *x)
 {
     return x->keys[0];
 }
 
-// merge key k and all keys and children from y into y's LEFT sibling x
+/**
+ * merge_left(x, y, k): merge key k and all keys and children from y into y's LEFT sibling x
+ *
+ * Pre-condition: x and y are siblings, x is to the left of y, and both have t-1 keys
+ * Post-condition: key k and all keys and children from y are merged into x, and y is deleted
+ */
 void BTree::merge_left(Node *x, Node *y, int k)
 {
-    //copying all keys
-    x->keys[t-1] = k;
-    for(int i = 0; i < t-1; i++){
-        x->keys[t+i]= y->keys[i];
+    // copying all keys
+    x->keys[t - 1] = k;
+    for (int i = 0; i < t - 1; i++)
+    {
+        x->keys[t + i] = y->keys[i];
     }
-    x->n = (2*t)-1;
-    if(!x->leaf){ //if not leaf getting kids
-        for(int i = 0; i < t; i++){
-            x->c[t+i]= y->c[i];
+    x->n = (2 * t) - 1;
+    if (!x->leaf)
+    { // if not leaf getting kids
+        for (int i = 0; i < t; i++)
+        {
+            x->c[t + i] = y->c[i];
         }
     }
     delete y;
 }
 
-// merge key k and all keys and children from y into y's RIGHT sibling x
+/**
+ * merge_right(x, y, k): merge key k and all keys and children from y into y's RIGHT sibling x
+ *
+ * Pre-condition: x and y are siblings, y is to the left of x, and both have t-1 keys
+ * Post-condition: key k and all keys and children from y are merged into x, and y is deleted
+ */
 void BTree::merge_right(Node *x, Node *y, int k)
 {
-    //copying all keys
-    x->keys[t-1] = k;
-    for(int i = 0; i < t-1; i++){
-        x->keys[t+i] = x->keys[i]; //move keys at i over
-        x->keys[i]= y->keys[i]; //copy key's from y at i to x
+    // copying all keys
+    x->keys[t - 1] = k;
+    for (int i = 0; i < t - 1; i++)
+    {
+        x->keys[t + i] = x->keys[i]; // move keys at i over
+        x->keys[i] = y->keys[i];     // copy key's from y at i to x
     }
-    x->n = (2*t)-1;
-    if(!x->leaf){ //if not leaf getting kids
-        for(int i = 0; i < t; i++){
-            x->c[t+i]= x->c[i]; //move child at i over
-            x->c[i] = y->c[i]; //grab y's child at i to replace x at i
+    x->n = (2 * t) - 1;
+    if (!x->leaf)
+    { // if not leaf getting kids
+        for (int i = 0; i < t; i++)
+        {
+            x->c[t + i] = x->c[i]; // move child at i over
+            x->c[i] = y->c[i];     // grab y's child at i to replace x at i
         }
     }
     delete y;
 }
 
-// Give y an extra key by moving a key from its parent x down into y
-// Move a key from y's LEFT sibling z up into x
-// Move appropriate child pointer from z into y
-// Let i be the index of the key dividing y and z in x
+/**
+ * swap_left(x, y, z, i): Give y an extra key by moving a key from its parent x down into y
+ *                        Move rightmost key from y's LEFT sibling z up into x
+ *                        Move rightmost child pointer from z into y leftmost position
+ *                        i is the index of the key dividing y and z in x
+ * Pre-condition: x is the parent of y and z, z is the LEFT sibling of y, and z has at least t keys
+ * Post-condition: y has one more key, z has one less key, and the keys and children are appropriately moved
+ */
 void BTree::swap_left(Node *x, Node *y, Node *z, int i)
 {
     // z = x->c[i] (left sibling), y = x->c[i+1]
@@ -245,10 +307,14 @@ void BTree::swap_left(Node *x, Node *y, Node *z, int i)
     z->n--;
 }
 
-// Give y an extra key by moving a key from its parent x down into y
-// Move a key from y's RIGHT sibling z up into x
-// Move appropriate child pointer from z into y
-// Let i be the index of the key dividing y and z in x
+/**
+ * swap_right(x, y, z, i): Give y an extra key by moving a key from its parent x down into y
+ *                         Move leftmost key from y's RIGHT sibling z up into x
+ *                         Move leftmost child pointer from z into y rightmost position
+ *                         i is the index of the key dividing y and z in x
+ * Pre-condition: x is the parent of y and z, z is the RIGHT sibling of y, and z has at least t keys
+ * Post-condition: y has one more key, z has one less key, and the keys and children are appropriately moved
+ */
 void BTree::swap_right(Node *x, Node *y, Node *z, int i)
 {
     // y = x->c[i], z = x->c[i+1] (right sibling)
