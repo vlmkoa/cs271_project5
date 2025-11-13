@@ -63,9 +63,30 @@ void BTree::remove(Node *x, int k, bool x_root)
     }
     else
     {
-        if(x->c[nearest]->n)
+        if(x->c[nearest]->n == t-1)
         {
+            
+            if (nearest>=1 && x->c[nearest-1]->n >= t)              //case 3a_i
+            {  
+                swap_left(x, x->c[nearest], x->c[nearest-1], nearest-1); 
+            }
+            else if (nearest <= n && x->c[nearest+1]->n >= t)       //case 3a_ii
+            {
+                swap_right(x, x->c[nearest], x->c[nearest+1], nearest);
+            }
+            else                                                    //case 3b
+            {
+                if(nearest>=1)
+                {
+                    merge_left();
+                }
+                else 
+                {
 
+                }
+            }
+            
+            
         }
         remove(x->c[nearest], int k, false);
     }
