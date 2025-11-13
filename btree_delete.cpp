@@ -18,7 +18,7 @@ void BTree::remove(int k)
 // delete the key k from the btree rooted at x
 void BTree::remove(Node *x, int k, bool x_root)
 {
-    int nearest = find_k(k);
+    int nearest = find_k(x, k);
     if (x->keys[nearest] == k)
     {
         //case 1
@@ -26,25 +26,38 @@ void BTree::remove(Node *x, int k, bool x_root)
         {
            remove_leaf_key(x, nearest);
         }
-        else
+        else //case 2
         {   
             //if child at nearest or nearest+1 has >= t keys
-            //case 2
+            //case 2a
             if (x->c[nearest]->n >= t)
             {
                 remove_internal_key(x, nearest, nearest);
             }
-            else if (x->c[nearest+1]-> >= t)
+            else if (x->c[nearest+1]->n >= t) //case 2b
             {
                 remove_internal_key(x, nearest, nearest+1);
             }
-            else  
+            else  //case 2c
             {
                 merge_left(x->c[nearest], x->c[nearest+1],k);
+                for(int i = nearest; i<x->n; i++){
+                    x->keys[i] = x->keys[i+1];
+                }
+                for(int i = nearest+1; i<((x->n)+1); i++){
+                    x->c[i] = x->c[i+1];
+                }
+
                 x->n--;
-                if (x_root && x->n == 0)
+                if (x_root && x->n == 0) //Root case
                 {
-                    
+                    root = x->c[0];
+                    delete x;
+                    remove(k); //recursive call
+                }
+                else
+                {
+                    remove(x->c[nearest],k); //recursive call
                 }
                 
             }
@@ -53,15 +66,11 @@ void BTree::remove(Node *x, int k, bool x_root)
             // nearest/nearest+1
             
             /* code */
-            
-            //case 3
-            //else
-            
         }
         
         
-    }
-    else
+    } 
+    else //case 3
     {
         if(x->c[nearest]->n == t-1)
         {
