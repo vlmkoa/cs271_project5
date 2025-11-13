@@ -157,11 +157,11 @@ int BTree::find_k(Node *x, int k)
  */
 void BTree::remove_leaf_key(Node *x, int i)
 {
+    x->n--;
     for (int j = i; j < x->n; j++)
     {
         x->keys[j] = x->keys[j + 1];
     }
-    x->n--;
     return;
 }
 
