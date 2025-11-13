@@ -52,12 +52,12 @@ void BTree::remove(Node *x, int k, bool x_root)
                 {
                     root = x->c[0];
                     delete x;
-                    // remove(k); // recursive call
+                    remove(k); // recursive call
                 }
-                // else
-                // {
-                //     remove(x->c[nearest], k); // recursive call
-                // }
+                else
+                {
+                    remove(x->c[nearest], k); // recursive call
+                }
             }
         }
     }
