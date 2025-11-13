@@ -40,7 +40,7 @@ void BTree::remove(Node *x, int k, bool x_root)
             }
             else // case 2c: both children have t-1 keys
             {
-                merge_left(x->c[nearest], x->c[nearest + 1], k);
+                merge_left(x->c[nearest], x->c[nearest + 1], x->keys[nearest]);
                 for (int i = nearest; i < (x->n - 1); i++)
                 {
                     x->keys[i] = x->keys[i + 1];
@@ -78,7 +78,7 @@ void BTree::remove(Node *x, int k, bool x_root)
             {
                 if (nearest < x->n) // nearest isn't the last one
                 {
-                    merge_right(x->c[nearest + 1], x->c[nearest], x->keys[x->n-1]);
+                    merge_right(x->c[nearest + 1], x->c[nearest], x->keys[nearest]);
                     for (int i = nearest; i < (x->n - 1); i++)
                     {
                         x->keys[i] = x->keys[i + 1];
@@ -90,7 +90,7 @@ void BTree::remove(Node *x, int k, bool x_root)
                 }
                 else // nearest is the last one
                 {
-                    merge_left(x->c[nearest - 1], x->c[nearest], k);
+                    merge_left(x->c[nearest - 1], x->c[nearest],  x->keys[nearest]);
                     nearest--;
                 }
                 x->n--;
