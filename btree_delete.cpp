@@ -172,41 +172,41 @@ int BTree::min_key(Node *x)
 // merge key k and all keys and children from y into y's LEFT sibling x
 void BTree::merge_left(Node *x, Node *y, int k)
 {
-    x->keys[x->n] = k;
-    x->n++;
-    int i = 0;
-    while (i < y->n)
+    // copying all keys
+    x->keys[t - 1] = k;
+    for (int i = 0; i < t - 1; i++)
     {
-        x->keys[x->n] = y->keys[i];
-        x->c[x->n] = y->c[i];
-        i++;
-        x->n++;
+        x->keys[t + i] = y->keys[i];
     }
-    x->c[x->n] = y->c[i]; // copy last child
+    x->n = (2 * t) - 1;
+    if (!x->leaf)
+    { // if not leaf getting kids
+        for (int i = 0; i < t; i++)
+        {
+            x->c[t + i] = y->c[i];
+        }
+    }
     delete y;
 }
 
 // merge key k and all keys and children from y into y's RIGHT sibling x
 void BTree::merge_right(Node *x, Node *y, int k)
 {
-    int curLen = x->n;         // current length of x
-    x->n = x->n + y->n + 1;    // the new length of x
-    x->c[x->n] = x->c[curLen]; // move x's last child node to new last position
-    int i = curLen - 1;
-    int j = x->n - 1;
-    while (i >= 0)
+    // copying all keys
+    x->keys[t - 1] = k;
+    for (int i = 0; i < t - 1; i++)
     {
-        x->keys[j] = x->keys[i];
-        x->c[j] = x->c[i];
-        i--;
-        j--;
+        x->keys[t + i] = x->keys[i]; // move keys at i over
+        x->keys[i] = y->keys[i];     // copy key's from y at i to x
     }
-    x->keys[j] = k;
-    x->c[j] = y->c[y->n];
-    for (int k = 0; k < y->n; k++)
-    {
-        x->keys[k] = y->keys[k];
-        x->c[k] = y->c[k];
+    x->n = (2 * t) - 1;
+    if (!x->leaf)
+    { // if not leaf getting kids
+        for (int i = 0; i < t; i++)
+        {
+            x->c[t + i] = x->c[i]; // move child at i over
+            x->c[i] = y->c[i];     // grab y's child at i to replace x at i
+        }
     }
     delete y;
 }
