@@ -35,6 +35,10 @@ void BTree::remove(Node *x, int k, bool x_root)
         return;
     }
     int nearest = find_k(x, k);
+
+    if(x->leaf && nearest == x->n){ //special case. not in leaf and not in tree
+        return; 
+    }
     if (nearest < x->n && x->keys[nearest] == k)
     {
         // case 1: key is in leaf node
