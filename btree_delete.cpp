@@ -52,12 +52,12 @@ void BTree::remove(Node *x, int k, bool x_root)
                 {
                     root = x->c[0];
                     delete x;
-                    // remove(k); // recursive call
+                    remove(k); // recursive call
                 }
-                // else
-                // {
-                //     remove(x->c[nearest], k); // recursive call
-                // }
+                else
+                {
+                    remove(x->c[nearest], k); // recursive call
+                }
             }
         }
     }
@@ -78,7 +78,7 @@ void BTree::remove(Node *x, int k, bool x_root)
             {
                 if (nearest < x->n) // nearest isn't the last one
                 {
-                    merge_right(x->c[nearest + 1], x->c[nearest], k);
+                    merge_right(x->c[nearest + 1], x->c[nearest], x->keys[x->n-1]);
                     for (int i = nearest; i < (x->n - 1); i++)
                     {
                         x->keys[i] = x->keys[i + 1];
@@ -172,11 +172,37 @@ int BTree::min_key(Node *x)
 // merge key k and all keys and children from y into y's LEFT sibling x
 void BTree::merge_left(Node *x, Node *y, int k)
 {
+    //copying all keys
+    x->keys[t-1] = k;
+    for(int i = 0; i < t-1; i++){
+        x->keys[t+i]= y->keys[i];
+    }
+    x->n = (2*t)-1;
+    if(!x->leaf){ //if not leaf getting kids
+        for(int i = 0; i < t; i++){
+            x->c[t+i]= y->c[i];
+        }
+    }
+    delete y;
 }
 
 // merge key k and all keys and children from y into y's RIGHT sibling x
 void BTree::merge_right(Node *x, Node *y, int k)
 {
+    //copying all keys
+    x->keys[t-1] = k;
+    for(int i = 0; i < t-1; i++){
+        x->keys[t+i] = x->keys[i]; //move keys at i over
+        x->keys[i]= y->keys[i]; //copy key's from y at i to x
+    }
+    x->n = (2*t)-1;
+    if(!x->leaf){ //if not leaf getting kids
+        for(int i = 0; i < t; i++){
+            x->c[t+i]= x->c[i]; //move child at i over
+            x->c[i] = y->c[i]; //grab y's child at i to replace x at i
+        }
+    }
+    delete y;
 }
 
 // Give y an extra key by moving a key from its parent x down into y
