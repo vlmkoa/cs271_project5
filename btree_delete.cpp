@@ -112,7 +112,11 @@ void BTree::remove(Node *x, int k, bool x_root)
 // if i = x.n then no such key exists
 int BTree::find_k(Node *x, int k)
 {
-    
+    int i = 0; //i is location
+    while(i < x->n && x->keys[i]<k){
+        i++;
+    }
+    return i;
 }
 
 // remove the key at index i from a btree leaf node x
@@ -144,11 +148,13 @@ void BTree::remove_internal_key(Node *x, int i, int j)
 // return the max key in the btree rooted at node x
 int BTree::max_key(Node *x)
 {
+    return x->keys[x->n-1];
 }
 
 // return the min key in the btree rooted at node x
 int BTree::min_key(Node *x)
 {
+    return x->keys[0];
 }
 
 // merge key k and all keys and children from y into y's LEFT sibling x
